@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel                      # FastAPI uses Pydantic heavily for validating and structuring incoming data.
 
 app = FastAPI()
 
@@ -20,12 +20,12 @@ problems = [
     }
 ]
 
-class Problem(BaseModel):
+class Problem(BaseModel):     # data validation model
     id: int
     title: str
     difficulty: str
 
-class createProblem(BaseModel):
+class createProblem(BaseModel):     # data validation model
     title: str      
     difficulty: str
 
@@ -46,9 +46,7 @@ async def specific_prblm(problem_id:int):   #FastAPI will automatically return a
     )
 
 
-# FastAPI uses Pydantic heavily for validating and structuring incoming data.
-
-@app.post("/problems", response_model = Problem, status_code=status.HTTP_201_CREATED)                              #Now FastAPI knows: For a POST /problems, expect a JSON body matching Problem.
+@app.post("/problems", response_model = Problem, status_code=status.HTTP_201_CREATED)    #Now FastAPI knows: For a POST /problems, expect a JSON body matching Problem.
 async def create_problem(problem:createProblem):
     new_problem = {
         "id":len(problems)+1,

@@ -1,0 +1,10 @@
+FastAPI     - web framework that handles HTTP requests and serves your data to users.
+   ↓
+SQLAlchemy  - Python database toolkit / Object-Relational Mapper (ORM) that lets you write Python code instead of raw SQL queries.
+   ↓
+psycopg     - this driver handles postgresql specific communication
+   ↓
+PostgreSQL  - RDBMS for persistent storage
+
+*Pydantic* : the data validation and serialization library that defines how data looks, 
+ensuring incoming API requests and outgoing responses match your exact structure and rules.
