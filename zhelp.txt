@@ -1,0 +1,52 @@
+FastAPI     - web framework that handles HTTP requests and serves your data to users.
+   ↓
+SQLAlchemy  - Python database toolkit / Object-Relational Mapper (ORM) that lets you write Python code instead of raw SQL queries.
+   ↓
+psycopg     - this driver handles postgresql specific communication
+   ↓
+PostgreSQL  - RDBMS for persistent storage
+
+*Pydantic* : the data validation and serialization library that defines how data looks, 
+ensuring incoming API requests and outgoing responses match your exact structure and rules.
+
+
+
+
+
+
+
+---- TESTING QUERIES AND TRIALS ---
+
+db = SessionLocal()
+
+# problems = db.query(Problem).all()  
+
+'''
+Query the Problem table
+        ↓
+Execute SELECT
+        ↓
+Get all rows
+        ↓
+Convert rows into Problem ORM objects
+        ↓
+Return them as a Python list
+'''
+
+# for problem in problems:
+#     print(problem.id, problem.title, problem.difficulty)
+
+# easy_problems = db.query(Problem).filter(Problem.difficulty == 'easy').all()  #SELECT * FROM problems WHERE difficulty = 'Easy';
+
+# for problem in easy_problems:
+#     print(problem.id, problem.title, problem.difficulty)
+
+problem = db.query(Problem).filter(Problem.id == 1).first()
+
+if problem:
+    print(problem.title)
+
+else:
+    print("This specific problem doesn't exist")
+
+db.close()
