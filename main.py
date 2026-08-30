@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel                      # FastAPI uses Pydantic heavily for validating and structuring incoming data.
 from database import ProblemDB, get_db
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError           # IntegrityError is a SQLAlchemy exception that represents a database integrity constraint violation.
 
 class Problem(BaseModel):     # data validation model (response model)
     id: int
@@ -56,8 +57,15 @@ async def create_problem(problem:ProblemCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_problem)
     
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,                                        # 409 - The request conflicts with the current state of the resource.
+            detail="A problem with this title already exists~"
+        )
+    
     except Exception:
         db.rollback()
-        raise 
-
+        raise
+    
     return new_problem   # SQLAlchemy has populated the generated id on your new_problem ORM object.
