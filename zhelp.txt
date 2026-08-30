@@ -9,6 +9,8 @@ PostgreSQL  - RDBMS for persistent storage
 *Pydantic* : the data validation and serialization library that defines how data looks, 
 ensuring incoming API requests and outgoing responses match your exact structure and rules.
 
+⭐ Alembic is SQLAlchemy's database migration tool.
+
 
 
 
