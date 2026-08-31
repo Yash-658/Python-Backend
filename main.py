@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel                      # FastAPI uses Pydantic heavily for validating and structuring incoming data.
-from database import ProblemDB, get_db
+from app.database import ProblemDB, get_db
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError           # IntegrityError is a SQLAlchemy exception that represents a database integrity constraint violation.
 
