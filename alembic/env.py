@@ -6,7 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.database import Base
-from app.models.problemDB import ProblemDB    
+from app.models.problemDB import ProblemDB
+from app.models.userDB import UserDB    
 
 # We're not using ProblemDB directly in env.py, so why import it?"
 # Because the import itself causes Python to execute: class ProblemDB(Base), which registers the model's table with Base.metadata

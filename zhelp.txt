@@ -6,11 +6,15 @@ psycopg     - this driver handles postgresql specific communication
    ↓
 PostgreSQL  - RDBMS for persistent storage
 
-*Pydantic* : the data validation and serialization library that defines how data looks, 
+⭐ Pydantic : the data validation and serialization library that defines how data looks, 
 ensuring incoming API requests and outgoing responses match your exact structure and rules.
 
 ⭐ Alembic is SQLAlchemy's database migration tool.
+⭐ pwdlib provides a clean password-hashing interface, while Argon2 is the hashing algorithm we'll use.
 
+
+IMP POINTS -
+>> We do not decrypt the hash. Password hashes are designed to be one-way.
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title
