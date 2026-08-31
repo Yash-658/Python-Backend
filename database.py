@@ -1,7 +1,13 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql+psycopg://postgres:7974420106#yash@localhost:5432/coding_platform"
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")    
+
+if DATABASE_URL is None:
+    raise RuntimeError("DATABASE_URL is not set")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind = engine)    # creating session factory, now all sessions will be made using this~
@@ -24,6 +30,4 @@ class ProblemDB(Base):              # it inherits from Base, SQLAlchemy recogniz
     id: Mapped[int] = mapped_column(primary_key=True)                 # an int PK, so SQLAlchemy uses DB auto-increment by default
     title: Mapped[str] = mapped_column(nullable=False, unique=True)   # Mapped[str] -> This is mapped to a DB column and its Python type is str
     difficulty: Mapped[str] = mapped_column(nullable=False)
-
-Base.metadata.create_all(engine)    # "Using this db engine, create all the tables described by my models if they don't already exist."
 

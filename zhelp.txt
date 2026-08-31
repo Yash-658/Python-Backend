@@ -52,3 +52,5 @@ else:
     print("This specific problem doesn't exist")
 
 db.close()
+
+Base.metadata.create_all(engine)    # USED THIS ONCE IN THE STARTING FOR CREATING TABLES, now alembic handles schema changes an migrations, "Using this db engine, create all the tables described by my models if they don't already exist."
