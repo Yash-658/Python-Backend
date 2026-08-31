@@ -61,7 +61,7 @@ async def create_problem(problem:ProblemCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(
             status_code=409,                                        # 409 - The request conflicts with the current state of the resource.
-            detail="A problem with this title already exists~"
+            detail="An Integrity constraint has been violated~"
         )
     
     except Exception:
