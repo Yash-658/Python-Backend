@@ -113,3 +113,29 @@ async def update_problem(
         raise
     
     return this_problem
+
+
+@app.delete("/problem/{problem_id}", status_code=status.HTTP_204_NO_CONTENT)   # The request succeeded, but there's no response body to return.
+
+async def delete_problem(
+    problem_id: int,
+    db: Session = Depends(get_db)):
+    
+    this_problem = (db.query(ProblemDB).filter(ProblemDB.id == problem_id).first())
+    
+    if this_problem is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Problem with problem ID: {problem_id} not found!"
+        )
+    
+    db.delete(this_problem)
+    
+    try:
+        db.commit()
+        
+    except Exception:
+        db.rollback()
+        raise 
+    
+    return None
