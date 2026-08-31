@@ -4,7 +4,8 @@ from sqlalchemy.exc import IntegrityError                     # IntegrityError i
 from sqlalchemy.orm import Session
 from app.schemas.problems import Problem, ProblemCreate, ProblemUpdate
 
-from app.database import ProblemDB, get_db
+from app.database import get_db
+from app.models.problemDB import ProblemDB
 
 router = APIRouter(prefix="/problems", tags=["Problems"])     # tags=["Problems"] simply groups these endpoints under Problems in Swagger /docs.
 
