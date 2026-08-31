@@ -9,10 +9,13 @@ class Problem(BaseModel):     # data validation model (response model)
     title: str
     difficulty: str
 
-class ProblemCreate(BaseModel):     # data validation model (request model)
+class ProblemCreate(BaseModel):     # data validation model  (@POST/problems)(request model)
     title: str      
     difficulty: str
 
+class ProblemUpdate(BaseModel):     # data validation model (@PATCH/problems)(request model)
+    title: str| None = None
+    difficulty: str| None = None
 
 app = FastAPI()
 
@@ -69,3 +72,44 @@ async def create_problem(problem:ProblemCreate, db: Session = Depends(get_db)):
         raise
     
     return new_problem   # SQLAlchemy has populated the generated id on your new_problem ORM object.
+
+
+@app.patch("/problems/{problem_id}", response_model = Problem)
+
+async def update_problem(
+    problem_id: int,
+    problem: ProblemUpdate,
+    db: Session = Depends(get_db)
+):
+    this_problem = (
+        db.query(ProblemDB).filter(ProblemDB.id == problem_id).first()
+    )
+    
+    if this_problem == None:
+        raise HTTPException(
+            status_code = 404,
+            detail = f"Problem id {problem_id} not found!"
+        )
+        
+    if problem.title is not None:
+        this_problem.title = problem.title
+    
+    if problem.difficulty is not None:
+        this_problem.difficulty = problem.difficulty
+        
+    try:
+        db.commit()
+        db.refresh(this_problem)
+    
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail = f"An Integrity constraint has been violated while updating this problem with id: {problem_id}"
+        )
+        
+    except Exception:
+        db.rollback()
+        raise
+    
+    return this_problem
