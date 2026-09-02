@@ -11,10 +11,16 @@ ensuring incoming API requests and outgoing responses match your exact structure
 
 ⭐ Alembic is SQLAlchemy's database migration tool.
 ⭐ pwdlib provides a clean password-hashing interface, while Argon2 is the hashing algorithm we'll use.
+⭐ PyJWT for handling JWT encoding and decoding 
+⭐ HS256 for signing secret key for our JWT
 
 
 IMP POINTS -
 >> We do not decrypt the hash. Password hashes are designed to be one-way.
+>> ID generation is handled by PostgreSQL itself
+>> JWT = Header.Payload.Signature; payload is readable, while the SECRET_KEY creates a signature tied to the exact header+payload, 
+preventing tampering(can't impersonate other users by modifying JWT) but not impersonation if the valid token is stolen.
+>> JWTs are bearer tokens: possession of a valid, unexpired token grants access as that user.
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title

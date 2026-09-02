@@ -1,13 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.orm import Session
-from app.schemas.users import UserCreate, UserResponse, UserLogin
+from app.schemas.users import UserCreate, UserResponse, TokenResponse
 
 from app.database import get_db
 from app.models.userDB import UserDB
 
 from app.utils.security import hash_password, verify_password
+from app.utils.auth import create_access_token, verify_access_token
+
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix = "/users", tags=["Users"])
 
@@ -38,9 +43,9 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login")
+@router.post("/login", response_model = TokenResponse, status_code=status.HTTP_200_OK)
 async def login_user(
-    user: UserLogin,
+    user: OAuth2PasswordRequestForm = Depends(),        # By Depends() -> "Create an OAuth2PasswordRequestForm from the incoming request's form fields and give it to me."
     db: Session = Depends(get_db)
 ):
     db_user = (db.query(UserDB).filter(UserDB.username == user.username).first())
@@ -56,10 +61,21 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,       
             detail="Incorrect username or password!"        
         )
+    
+    access_token = create_access_token(
+        data={"sub":str(db_user.id)})
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"             # jwt is a bearer token, i.e anyone with a token can get access as this user~
+    }
         
 
-@router.get("", response_model=list[UserResponse])
-async def get_users(db: Session = Depends(get_db)):
+@router.get("", response_model=list[UserResponse])     
+async def get_users(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)        # we are intentionally not using current_user inside the fxn, the dependency itself is the gatekeeper, now @get /users is a protected endpoint~
+    ):
     users = (db.query(UserDB).all())
     return users
 
