@@ -13,6 +13,7 @@ ensuring incoming API requests and outgoing responses match your exact structure
 ⭐ pwdlib provides a clean password-hashing interface, while Argon2 is the hashing algorithm we'll use.
 ⭐ PyJWT for handling JWT encoding and decoding 
 ⭐ HS256 for signing secret key for our JWT
+⭐ Using OAuth2PasswordBearer for fetching JWT token from the authentication header of the request body~
 
 
 IMP POINTS -

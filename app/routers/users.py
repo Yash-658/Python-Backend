@@ -76,6 +76,9 @@ async def get_users(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)        # we are intentionally not using current_user inside the fxn, the dependency itself is the gatekeeper, now @get /users is a protected endpoint~
     ):
+    
+    print(current_user.username)
+    
     users = (db.query(UserDB).all())
     return users
 
