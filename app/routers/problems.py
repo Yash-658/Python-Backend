@@ -40,7 +40,7 @@ async def specific_prblm(problem_id:int, db: Session = Depends(get_db)):   #Fast
 async def create_problem(
     problem:ProblemCreate,
     db: Session = Depends(get_db),
-    curr_admin: UserDB = Depends(require_role("admin"))
+    curr_admin: UserDB = Depends(require_role("admin"))                            # this makes the user require a "admin" role for accessing this endpoint with @post
     ):
     
     new_problem = ProblemDB(
