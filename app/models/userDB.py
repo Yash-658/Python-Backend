@@ -19,3 +19,10 @@ class UserDB(Base):
     )
     
     password_hash:Mapped[str] = mapped_column(nullable=False)
+    
+    role:Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="user",              # This "default" here in SQLAlchemy is primarily an ORM-side default, that means it won't automatically add "users" in this column for existing rows~
+        server_default="user"
+    )

@@ -10,10 +10,10 @@ from app.models.userDB import UserDB
 # used to extract JWT token from the autherization header sent by the user in future requests after login~                         
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")       # tokenUrl is supplied just to tell SwaggerUI this is where tokens are generated so it can represent out authenication schema in docs~
 
-def get_current_user(
+def get_current_user (
     token: str = Depends(oauth2_scheme),             # using FastAPI dependency injection, so when we will call get_current_user, fastapi will call it dependencies first~
     db: Session = Depends(get_db)
-    ): 
+    ) -> UserDB: 
     
     payload = verify_access_token(token)
     
