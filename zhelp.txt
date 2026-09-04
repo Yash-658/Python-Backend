@@ -14,7 +14,7 @@ ensuring incoming API requests and outgoing responses match your exact structure
 ⭐ PyJWT for handling JWT encoding and decoding 
 ⭐ HS256 for signing secret key for our JWT
 ⭐ Using OAuth2PasswordBearer for fetching JWT token from the authentication header of the request body~
-
+⭐ Using RBAC (Role Based Access Control), ex: admins users can modify problems, while normal users can access and submit solutions on them, and anyone can see them~ 
 
 IMP POINTS -
 >> We do not decrypt the hash. Password hashes are designed to be one-way.
@@ -27,41 +27,12 @@ TO DO:
 -> case sensitive uniqueness checking for problemDB.title
 
 
-
----- TESTING QUERIES AND TRIALS ---
-
-db = SessionLocal()
-
-# problems = db.query(Problem).all()  
-
-'''
-Query the Problem table
-        ↓
-Execute SELECT
-        ↓
-Get all rows
-        ↓
-Convert rows into Problem ORM objects
-        ↓
-Return them as a Python list
-'''
-
-# for problem in problems:
-#     print(problem.id, problem.title, problem.difficulty)
-
-# easy_problems = db.query(Problem).filter(Problem.difficulty == 'easy').all()  #SELECT * FROM problems WHERE difficulty = 'Easy';
-
-# for problem in easy_problems:
-#     print(problem.id, problem.title, problem.difficulty)
-
-problem = db.query(Problem).filter(Problem.id == 1).first()
-
-if problem:
-    print(problem.title)
-
-else:
-    print("This specific problem doesn't exist")
-
-db.close()
-
-Base.metadata.create_all(engine)    # USED THIS ONCE IN THE STARTING FOR CREATING TABLES, now alembic handles schema changes an migrations, "Using this db engine, create all the tables described by my models if they don't already exist."
+                    CODING PLATFORM
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+        PUBLIC        AUTHENTICATED        ADMIN
+          │                │                │
+     Read problems    Submit solutions   Manage problems
+     Browse problems  View own history   Manage users
+                      User profile       etc.

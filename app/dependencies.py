@@ -41,5 +41,21 @@ def get_current_user (
         ) 
         
     return db_user
-        
     
+    
+def require_role(             # A higher order function~
+    required_role: str
+):
+    def role_checker(         # this is like a specialized dependency fxn
+        current_user: UserDB = Depends(get_current_user)
+    ):
+            
+        if current_user.role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,      # 403 Forbidden→ "I know who you are, but you're not allowed to do this."
+                detail="Insufficient permissions"
+            )
+            
+        return current_user
+    
+    return role_checker

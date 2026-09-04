@@ -6,6 +6,9 @@ from app.schemas.problems import Problem, ProblemCreate, ProblemUpdate
 
 from app.database import get_db
 from app.models.problemDB import ProblemDB
+from app.models.userDB import UserDB
+
+from app.dependencies import require_role
 
 router = APIRouter(prefix="/problems", tags=["Problems"])     # tags=["Problems"] simply groups these endpoints under Problems in Swagger /docs.
 
@@ -34,7 +37,12 @@ async def specific_prblm(problem_id:int, db: Session = Depends(get_db)):   #Fast
     
 @router.post("", response_model = Problem, status_code=status.HTTP_201_CREATED)    #Now FastAPI knows: For a POST /problems, expect a JSON body matching Problem.
 
-async def create_problem(problem:ProblemCreate, db: Session = Depends(get_db)):
+async def create_problem(
+    problem:ProblemCreate,
+    db: Session = Depends(get_db),
+    curr_admin: UserDB = Depends(require_role("admin"))
+    ):
+    
     new_problem = ProblemDB(
         title = problem.title,
         difficulty = problem.difficulty
@@ -64,7 +72,8 @@ async def create_problem(problem:ProblemCreate, db: Session = Depends(get_db)):
 async def update_problem(
     problem_id: int,
     problem: ProblemUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    curr_admin: UserDB = Depends(require_role("admin"))
 ):
     this_problem = (
         db.query(ProblemDB).filter(ProblemDB.id == problem_id).first()
@@ -104,7 +113,8 @@ async def update_problem(
 
 async def delete_problem(
     problem_id: int,
-    db: Session = Depends(get_db)):
+    db: Session = Depends(get_db),
+    curr_admin: UserDB = Depends(require_role("admin"))):
     
     this_problem = (db.query(ProblemDB).filter(ProblemDB.id == problem_id).first())
     
