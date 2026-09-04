@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy import String, Text, ForeignKey, func
 
 from app.database import Base
 
@@ -33,4 +35,9 @@ class SubmissionDB(Base):
         nullable=False,
         default="pending",
         server_default="pending"
+    )
+    
+    created_at: Mapped[datetime] = mapped_column(
+        nullable=False, 
+        server_default=func.now()
     )
