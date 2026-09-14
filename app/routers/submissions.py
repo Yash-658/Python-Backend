@@ -47,3 +47,14 @@ async def create_submission(
     except Exception:
         db.rollback()
         raise
+    
+@router.get(
+    "", 
+    response_model=list[SubmissionResponse],
+    status_code=status.HTTP_200_OK)
+
+async def get_submissions(                                        # gets all submissions of the current user~
+    current_user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return db.query(SubmissionDB).filter(SubmissionDB.user_id == current_user.id).all()         # implemeneted resource ownership, so they can only see submissions of themselves~
