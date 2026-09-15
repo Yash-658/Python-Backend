@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
-from sqlalchemy.exc import IntegrityError
-
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.submissionDB import SubmissionDB
+from app.models.problemDB import ProblemDB
 from app.models.userDB import UserDB
 from app.schemas.submissions import SubmissionCreate, SubmissionResponse
 
@@ -25,6 +24,15 @@ async def create_submission(
     db: Session = Depends(get_db),
     current_user: UserDB = Depends(get_current_user)
 ):
+    
+    problem = db.query(ProblemDB).filter(ProblemDB.id == submission.problem_id).first()
+    
+    if problem is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Problem not found"
+        )
+        
     new_submission = SubmissionDB(
         user_id = current_user.id,
         problem_id = submission.problem_id,
@@ -36,13 +44,6 @@ async def create_submission(
         db.add(new_submission)
         db.commit()
         db.refresh(new_submission)
-
-    except IntegrityError:                  # it will only happen when a problem_id we are trying to push with the submission doesn't really exist~
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Problem not found"
-        )
 
     except Exception:
         db.rollback()

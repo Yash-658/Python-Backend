@@ -79,9 +79,3 @@ async def get_users(
         
     users = (db.query(UserDB).all())
     return users
-
-
-
-
-
-
