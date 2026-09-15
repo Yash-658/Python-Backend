@@ -48,6 +48,8 @@ async def create_submission(
         db.rollback()
         raise
     
+    return new_submission
+    
 @router.get(
     "", 
     response_model=list[SubmissionResponse],
@@ -58,3 +60,24 @@ async def get_submissions(                                        # gets all sub
     db: Session = Depends(get_db)
 ):
     return db.query(SubmissionDB).filter(SubmissionDB.user_id == current_user.id).all()         # implemeneted resource ownership, so they can only see submissions of themselves~
+
+@router.get(
+    "/{submission_id}",
+    response_model = SubmissionResponse,
+    status_code = status.HTTP_200_OK
+)
+
+async def get_submission(
+    submission_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserDB = Depends(get_current_user)
+):
+    submission = db.query(SubmissionDB).filter(SubmissionDB.user_id == current_user.id, SubmissionDB.id == submission_id).first()
+    
+    if submission is None:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Submission not found"
+        )
+        
+    return submission
