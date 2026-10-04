@@ -3,10 +3,12 @@ from sqlalchemy.exc import IntegrityError                     # IntegrityError i
 
 from sqlalchemy.orm import Session
 from app.schemas.problems import Problem, ProblemCreate, ProblemUpdate
+from app.schemas.testCases import TestCaseCreate, TestCaseResponse
 
 from app.database import get_db
 from app.models.problemDB import ProblemDB
 from app.models.userDB import UserDB
+from app.models.testCaseDB import TestCaseDB
 
 from app.dependencies import require_role
 
@@ -50,6 +52,17 @@ async def create_problem(
 
     try:
         db.add(new_problem)
+        db.flush()                                      # inserts the pending insertions into the DB without commiting, tus giving us new_problem.id while also keeping the creation of testcases and problem as a single transaction
+        
+        for testcase in problem.test_cases:
+            new_testcase = TestCaseDB(
+                problem_id = new_problem.id,
+                input_data = testcase.input_data,
+                expected_output = testcase.expected_output
+            )
+            
+            db.add(new_testcase)
+        
         db.commit()
         db.refresh(new_problem)
     
@@ -134,3 +147,39 @@ async def delete_problem(
         raise 
     
     return None
+
+
+@router.post("/{problem_id}/test_cases", status_code=status.HTTP_201_CREATED, response_model=TestCaseResponse)
+
+async def add_test_cases(
+    problem_id:int,
+    testcase: TestCaseCreate,
+    db: Session = Depends(get_db),
+    curr_admin: UserDB = Depends(require_role("admin"))
+):
+    problem = db.query(ProblemDB).filter(
+        ProblemDB.id == problem_id
+    ).first()
+
+    if problem is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Problem not found"
+        )
+
+    new_testcase = TestCaseDB(
+        problem_id=problem_id,
+        input_data=testcase.input_data,
+        expected_output=testcase.expected_output
+    )
+
+    try:
+        db.add(new_testcase)
+        db.commit()
+        db.refresh(new_testcase)
+
+    except Exception:
+        db.rollback()
+        raise
+
+    return new_testcase
