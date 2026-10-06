@@ -7,6 +7,7 @@ from app.models.submissionDB import SubmissionDB
 from app.models.problemDB import ProblemDB
 from app.models.userDB import UserDB
 from app.schemas.submissions import SubmissionCreate, SubmissionResponse
+from app.services.judge_service import judge_submission
 
 router = APIRouter(
     prefix="/submissions",
@@ -44,6 +45,7 @@ async def create_submission(
         db.add(new_submission)
         db.commit()
         db.refresh(new_submission)
+        judge_submission(new_submission, db)
 
     except Exception:
         db.rollback()

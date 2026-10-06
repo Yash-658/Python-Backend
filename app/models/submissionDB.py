@@ -1,9 +1,13 @@
 from datetime import datetime
 
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String, Text, ForeignKey, func
 
 from app.database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.problemDB import ProblemDB
 
 class SubmissionDB(Base):
     __tablename__ = "submissions"
@@ -35,6 +39,10 @@ class SubmissionDB(Base):
         nullable=False,
         default="pending",
         server_default="pending"
+    )
+    
+    problem: Mapped["ProblemDB"] = relationship(
+        back_populates="submissions"
     )
     
     # judge results~
