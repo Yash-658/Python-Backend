@@ -13,4 +13,7 @@ class SubmissionResponse(BaseModel):
     code: str
     language: str
     status: str
+    execution_time: float | None
+    memory_used: int | None
+    error_message: str | None
     created_at: datetime

@@ -37,7 +37,15 @@ class SubmissionDB(Base):
         server_default="pending"
     )
     
+    # judge results~
+    execution_time: Mapped[float | None] = mapped_column(nullable=True)
+    
+    memory_used: Mapped[int | None] = mapped_column(nullable=True)
+    
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
     created_at: Mapped[datetime] = mapped_column(
         nullable=False, 
         server_default=func.now()
     )
+    
