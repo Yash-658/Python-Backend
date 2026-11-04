@@ -41,16 +41,28 @@ async def create_submission(
         language = submission.language,
     )
     
+    # Save first so the submission has a database ID.
+    db.add(new_submission)
+    db.commit()
+    db.refresh(new_submission)
+
     try:
-        db.add(new_submission)
+        # Run the code against the problem's test cases.
+        verdict = judge_submission(
+            new_submission.code,
+            problem.test_cases
+        )
+
+        # Persist the final verdict.
+        new_submission.status = verdict
+
         db.commit()
         db.refresh(new_submission)
-        judge_submission(new_submission, db)
 
     except Exception:
         db.rollback()
         raise
-    
+
     return new_submission
     
 @router.get(

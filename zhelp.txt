@@ -22,6 +22,7 @@ IMP POINTS -
 >> JWT = Header.Payload.Signature; payload is readable, while the SECRET_KEY creates a signature tied to the exact header+payload, 
 preventing tampering(can't impersonate other users by modifying JWT) but not impersonation if the valid token is stolen.
 >> JWTs are bearer tokens: possession of a valid, unexpired token grants access as that user.
+>> WE ARE STRIPPING WHITESPACES BEFORE COMPARING OUTPUT, so take this in consideration when adding testcases where leading or trailing whitespaces are necessary
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title
