@@ -17,3 +17,5 @@ class SubmissionResponse(BaseModel):
     memory_used: int | None
     error_message: str | None
     created_at: datetime
+    passed_test_cases: int
+    total_test_cases: int

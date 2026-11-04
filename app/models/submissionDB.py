@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, Text, ForeignKey, func
+from sqlalchemy import String, Text, ForeignKey, func, Integer
 
 from app.database import Base
 from typing import TYPE_CHECKING
@@ -55,5 +55,19 @@ class SubmissionDB(Base):
     created_at: Mapped[datetime] = mapped_column(
         nullable=False, 
         server_default=func.now()
+    )
+    
+    passed_test_cases: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0"
+    )
+
+    total_test_cases: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0"
     )
     
