@@ -8,6 +8,7 @@ class SubmissionJudgeResult:
     status: str
     passed_test_cases: int
     total_test_cases: int
+    execution_time: float
 
 def normalize_output(output: str) -> str:
     return output.strip()
@@ -25,12 +26,14 @@ def judge_test_case(code: str, test_case: TestCaseDB) -> ExecutionResult:
     if compare_output(result.output, test_case.expected_output):
         return ExecutionResult(
             status="accepted",
-            output=result.output
+            output=result.output,
+            execution_time=result.execution_time
         )
 
     return ExecutionResult(
         status="wrong_answer",
-        output=result.output
+        output=result.output,
+        execution_time=result.execution_time
     )
     
     
@@ -39,12 +42,16 @@ def judge_submission(code: str, test_cases: list[TestCaseDB]) -> SubmissionJudge
     total_test_cases = len(test_cases)
     passed_test_cases = 0
     first_failure_status = None
+    total_execution_time = 0.0
     
     for test_case in test_cases:
         result = judge_test_case(
             code=code,
             test_case = test_case
         )
+        
+        if result.execution_time is not None:
+            total_execution_time += result.execution_time
 
         if result.status == "accepted":
             passed_test_cases += 1
@@ -60,5 +67,6 @@ def judge_submission(code: str, test_cases: list[TestCaseDB]) -> SubmissionJudge
     return SubmissionJudgeResult(
         status=final_status,
         passed_test_cases=passed_test_cases,
-        total_test_cases=total_test_cases
+        total_test_cases=total_test_cases,
+        execution_time=total_execution_time
     )
