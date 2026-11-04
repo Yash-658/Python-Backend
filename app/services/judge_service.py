@@ -1,7 +1,13 @@
 from app.models.testCaseDB import TestCaseDB
 from app.services.code_executor import execute_python
 from app.services.execution_result import ExecutionResult
+from dataclasses import dataclass
 
+@dataclass
+class SubmissionJudgeResult:
+    status: str
+    passed_test_cases: int
+    total_test_cases: int
 
 def normalize_output(output: str) -> str:
     return output.strip()
@@ -28,14 +34,31 @@ def judge_test_case(code: str, test_case: TestCaseDB) -> ExecutionResult:
     )
     
     
-def judge_submission(code: str, test_cases: list[TestCaseDB]) -> str:
+def judge_submission(code: str, test_cases: list[TestCaseDB]) -> SubmissionJudgeResult:
+    
+    total_test_cases = len(test_cases)
+    passed_test_cases = 0
+    first_failure_status = None
+    
     for test_case in test_cases:
         result = judge_test_case(
             code=code,
             test_case = test_case
         )
 
-        if result.status != "accepted":
-            return result.status
+        if result.status == "accepted":
+            passed_test_cases += 1
+            
+        elif first_failure_status is None:
+            first_failure_status = result.status
 
-    return "accepted"
+    if total_test_cases == 0:
+        final_status = "no_test_cases"
+    else:
+        final_status = first_failure_status or "accepted"
+        
+    return SubmissionJudgeResult(
+        status=final_status,
+        passed_test_cases=passed_test_cases,
+        total_test_cases=total_test_cases
+    )

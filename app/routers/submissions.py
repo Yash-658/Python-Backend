@@ -54,7 +54,9 @@ async def create_submission(
         )
 
         # Persist the final verdict.
-        new_submission.status = verdict
+        new_submission.status = verdict.status
+        new_submission.passed_test_cases = verdict.passed_test_cases
+        new_submission.total_test_cases = verdict.total_test_cases
 
         db.commit()
         db.refresh(new_submission)
