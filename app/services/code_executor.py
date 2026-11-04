@@ -2,6 +2,7 @@ import subprocess               # lets our backend launch an external process, h
 import tempfile                 # creates temporary files safely; we'll store submitted code there.
 from pathlib import Path        # helps work with filesystem paths in a clean, cross-platform way.
 import uuid
+from time import perf_counter
 
 from app.services.execution_result import ExecutionResult
 
@@ -31,6 +32,8 @@ def execute_python(code: str, input_data: str = "", timeout: int = 3) -> Executi
             "python", "/workspace/main.py"
         ]
 
+        start_time = perf_counter()
+        
         try:
             result = subprocess.run(
                 docker_command,
@@ -41,6 +44,8 @@ def execute_python(code: str, input_data: str = "", timeout: int = 3) -> Executi
             )
 
         except subprocess.TimeoutExpired:
+            execution_time = perf_counter() - start_time
+            
             subprocess.run(
                 ["docker", "rm", "-f", container_name],
                 capture_output=True,
@@ -50,11 +55,15 @@ def execute_python(code: str, input_data: str = "", timeout: int = 3) -> Executi
             return ExecutionResult(
                 status="time_limit_exceeded",
                 output="",
-                error="Execution timed out"
+                error="Execution timed out",
+                execution_time=execution_time
             )
             
+        execution_time = perf_counter() - start_time
+
         return ExecutionResult(
             status="success" if result.returncode == 0 else "runtime_error",
             output=result.stdout,
+            execution_time=execution_time,
             error=result.stderr or None
         )
