@@ -15,7 +15,8 @@ def execute_python(code: str, input_data: str = "", timeout: int = 3) -> Executi
         
         runner_path = Path(temp_dir) / "runner.py"
 
-        runner_code = textwrap.dedent("""              # It removes common leading whitespace from every line. This allows us to define properly formatted Python code inside another function.
+        # It removes common leading whitespace from every line. This allows us to define properly formatted Python code inside another function.
+        runner_code = textwrap.dedent("""
             import resource
             import subprocess
             import sys
