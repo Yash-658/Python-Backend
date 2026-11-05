@@ -66,7 +66,7 @@ async def create_submission(
     except Exception:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_102_PROCESSING,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Problem in judging your submission"
         )
 
