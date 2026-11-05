@@ -7,5 +7,5 @@ class ExecutionResult:
     status: str
     output: str
     execution_time: float | None = None
-    memory_used: int | None = None
+    memory_used: float | None = None
     error: str | None = None

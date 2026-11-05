@@ -23,6 +23,8 @@ IMP POINTS -
 preventing tampering(can't impersonate other users by modifying JWT) but not impersonation if the valid token is stolen.
 >> JWTs are bearer tokens: possession of a valid, unexpired token grants access as that user.
 >> WE ARE STRIPPING WHITESPACES BEFORE COMPARING OUTPUT, so take this in consideration when adding testcases where leading or trailing whitespaces are necessary
+>> One distinction: In total_execution_time, its total elapsed time across five Docker runs, including container startup and shutdown.
+   It isn't just the Python code's execution time.
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title

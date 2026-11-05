@@ -14,7 +14,7 @@ class SubmissionResponse(BaseModel):
     language: str
     status: str
     execution_time: float | None
-    memory_used: int | None
+    memory_used: float | None
     error_message: str | None
     created_at: datetime
     passed_test_cases: int

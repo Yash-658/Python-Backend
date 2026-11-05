@@ -48,7 +48,7 @@ class SubmissionDB(Base):
     # judge results~
     execution_time: Mapped[float | None] = mapped_column(nullable=True)
     
-    memory_used: Mapped[int | None] = mapped_column(nullable=True)
+    memory_used: Mapped[float | None] = mapped_column(nullable=True)
     
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     

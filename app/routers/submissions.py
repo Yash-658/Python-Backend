@@ -58,13 +58,17 @@ async def create_submission(
         new_submission.passed_test_cases = verdict.passed_test_cases
         new_submission.total_test_cases = verdict.total_test_cases
         new_submission.execution_time = verdict.execution_time
+        new_submission.memory_used = verdict.memory_used
 
         db.commit()
         db.refresh(new_submission)
 
     except Exception:
         db.rollback()
-        raise
+        raise HTTPException(
+            status_code=status.HTTP_102_PROCESSING,
+            detail="Problem in judging your submission"
+        )
 
     return new_submission
     
