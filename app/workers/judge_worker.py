@@ -43,6 +43,7 @@ def judge_submission_job(submission_id: int) -> None:
 
         # Mark the submission as currently being judged.
         submission.status = "judging"
+        submission.error_message = None                 # We must clear the previous error message so the final accepted submission doesn't incorrectly retain an old failure message.
         db.commit()
 
         # Execute the existing judging logic.
@@ -86,7 +87,7 @@ def judge_submission_job(submission_id: int) -> None:
             db.rollback()
             logger.exception("Could not update failed submission status")
 
-        raise
+        raise     # RQ needs the exception to know the job failed and should be retried.
 
     finally:
         db.close()

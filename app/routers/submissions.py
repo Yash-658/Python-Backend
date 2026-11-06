@@ -9,6 +9,7 @@ from app.models.userDB import UserDB
 from app.schemas.submissions import SubmissionCreate, SubmissionResponse
 from app.queue import judge_queue
 from app.workers.judge_worker import judge_submission_job
+from rq import Retry
 
 
 router = APIRouter(
@@ -52,7 +53,8 @@ async def create_submission(
         # Run the code against the problem's test cases.
         judge_queue.enqueue(
             judge_submission_job,
-            new_submission.id
+            new_submission.id,
+            retry=Retry(max=2)
         )
 
     except Exception:
