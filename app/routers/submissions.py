@@ -7,7 +7,9 @@ from app.models.submissionDB import SubmissionDB
 from app.models.problemDB import ProblemDB
 from app.models.userDB import UserDB
 from app.schemas.submissions import SubmissionCreate, SubmissionResponse
-from app.services.judge_service import judge_submission
+from app.queue import judge_queue
+from app.workers.judge_worker import judge_submission_job
+
 
 router = APIRouter(
     prefix="/submissions",
@@ -17,7 +19,7 @@ router = APIRouter(
 @router.post(
     "",
     response_model = SubmissionResponse,
-    status_code = status.HTTP_201_CREATED
+    status_code=status.HTTP_202_ACCEPTED
 )
 
 async def create_submission(
@@ -48,26 +50,21 @@ async def create_submission(
 
     try:
         # Run the code against the problem's test cases.
-        verdict = judge_submission(
-            new_submission.code,
-            problem.test_cases
+        judge_queue.enqueue(
+            judge_submission_job,
+            new_submission.id
         )
 
-        # Persist the final verdict.
-        new_submission.status = verdict.status
-        new_submission.passed_test_cases = verdict.passed_test_cases
-        new_submission.total_test_cases = verdict.total_test_cases
-        new_submission.execution_time = verdict.execution_time
-        new_submission.memory_used = verdict.memory_used
-
-        db.commit()
-        db.refresh(new_submission)
-
     except Exception:
-        db.rollback()
+        new_submission.status = "judge_error"
+        new_submission.error_message = (
+            "Unable to queue submission for judging."
+        )
+        db.commit()
+
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Problem in judging your submission"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Submission saved, but judging service is unavailable."
         )
 
     return new_submission
