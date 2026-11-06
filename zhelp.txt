@@ -15,6 +15,7 @@ ensuring incoming API requests and outgoing responses match your exact structure
 ⭐ HS256 for signing secret key for our JWT
 ⭐ Using OAuth2PasswordBearer for fetching JWT token from the authentication header of the request body~
 ⭐ Using RBAC (Role Based Access Control), ex: admins users can modify problems, while normal users can access and submit solutions on them, and anyone can see them~ 
+⭐ Using redisRQ (redis queue) for seperating submission API and code judging logic
 
 IMP POINTS -
 >> We do not decrypt the hash. Password hashes are designed to be one-way.
@@ -39,3 +40,11 @@ TO DO:
      Read problems    Submit solutions   Manage problems
      Browse problems  View own history   Manage users
                       User profile       etc.
+
+
+>> models/	   Database models
+>> schemas/	   Request and response validation
+>> routers/	   API endpoints
+>> services/	Business logic, such as judging submissions
+>> utils/	   Reusable helper functions
+>> queue.py	   Redis connection and queue configuration
