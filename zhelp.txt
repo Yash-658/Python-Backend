@@ -26,6 +26,8 @@ preventing tampering(can't impersonate other users by modifying JWT) but not imp
 >> WE ARE STRIPPING WHITESPACES BEFORE COMPARING OUTPUT, so take this in consideration when adding testcases where leading or trailing whitespaces are necessary
 >> One distinction: In total_execution_time, its total elapsed time across five Docker runs, including container startup and shutdown.
    It isn't just the Python code's execution time.
+>> When Python executes import app.models, it automatically executes app/models/__init__.py.
+
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title

@@ -4,9 +4,7 @@ from rq import SimpleWorker
 from rq.timeouts import TimerDeathPenalty
 
 from app.database import SessionLocal
-from app.models.submissionDB import SubmissionDB
-from app.models.problemDB import ProblemDB
-from app.models.userDB import UserDB                 # adding cuz without it our worker can't reference the foriegn key relation present in SubmissionDB
+from app.models import SubmissionDB, ProblemDB
 from app.services.judge_service import judge_submission
 from app.queue import judge_queue
 
