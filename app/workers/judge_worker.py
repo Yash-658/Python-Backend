@@ -11,6 +11,54 @@ from app.queue import judge_queue
 
 logger = logging.getLogger(__name__)
 
+def mark_submission_failed(
+    job,
+    connection,
+    exc_type,
+    exc_value,
+    traceback
+):
+    # Do not mark the submission failed if RQ can still retry it.
+    if job.retries_left and job.retries_left > 0:
+        return
+
+    if not job.args:
+        logger.error("Failed judging job has no submission ID.")
+        return
+
+    submission_id = job.args[0]
+    db = SessionLocal()
+
+    try:
+        submission = (
+            db.query(SubmissionDB)
+            .filter(SubmissionDB.id == submission_id)
+            .first()
+        )
+
+        if submission is None:
+            logger.error(
+                "Submission %s not found during failure handling",
+                submission_id
+            )
+            return
+
+        submission.status = "judge_error"
+        submission.error_message = (
+            "Judging could not be completed after retries."
+        )
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        logger.exception(
+            "Could not mark submission %s as failed",
+            submission_id
+        )
+
+    finally:
+        db.close()
 
 def judge_submission_job(submission_id: int) -> None:
 
@@ -67,31 +115,10 @@ def judge_submission_job(submission_id: int) -> None:
             "Judging failed for submission %s",
             submission_id
         )
-
-        # Record an internal judging failure in PostgreSQL.
-        try:
-            submission = (
-                db.query(SubmissionDB)
-                .filter(SubmissionDB.id == submission_id)
-                .first()
-            )
-
-            if submission is not None:
-                submission.status = "judge_error"
-                submission.error_message = (
-                    "An internal error occurred while judging."
-                )
-                db.commit()
-
-        except Exception:
-            db.rollback()
-            logger.exception("Could not update failed submission status")
-
         raise     # RQ needs the exception to know the job failed and should be retried.
 
     finally:
         db.close()
-
 
 # Windows-compatible worker for local development. In linux we won't need this~
 class WindowsSimpleWorker(SimpleWorker):
@@ -101,7 +128,8 @@ class WindowsSimpleWorker(SimpleWorker):
 if __name__ == "__main__":              # This condition checks whether the Python file is being executed directly.
     worker = WindowsSimpleWorker(
         [judge_queue],
-        connection=judge_queue.connection
+        connection=judge_queue.connection,
+        maintenance_interval=60
     )
 
     worker.work()

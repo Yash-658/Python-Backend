@@ -8,7 +8,7 @@ from app.models.problemDB import ProblemDB
 from app.models.userDB import UserDB
 from app.schemas.submissions import SubmissionCreate, SubmissionResponse
 from app.queue import judge_queue
-from app.workers.judge_worker import judge_submission_job
+from app.workers.judge_worker import judge_submission_job, mark_submission_failed
 from rq import Retry
 
 
@@ -54,7 +54,8 @@ async def create_submission(
         judge_queue.enqueue(
             judge_submission_job,
             new_submission.id,
-            retry=Retry(max=2)
+            retry=Retry(max=2),
+            on_failure=mark_submission_failed               # tells RQ what to do when a job ultimately fails or is abandoned.
         )
 
     except Exception:
