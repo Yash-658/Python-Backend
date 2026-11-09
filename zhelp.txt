@@ -28,6 +28,9 @@ preventing tampering(can't impersonate other users by modifying JWT) but not imp
    It isn't just the Python code's execution time.
 >> When Python executes import app.models, it automatically executes app/models/__init__.py.
 >> two retries for temporary judging failures in RQ, followed by a clear final failure state.
+>> Implemented custom failed job management tool in workers.failed_jobs
+   use "python -m app.workers.failed_jobs list" to list failed jobs 
+   use "python -m app.workers.failed_jobs requeue abc123" to requeue a failed job with its job id
 
 TO DO:
 -> case sensitive uniqueness checking for problemDB.title
