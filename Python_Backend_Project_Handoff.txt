@@ -1,0 +1,131 @@
+PYTHON BACKEND CODING PLATFORM — PROJECT HANDOFF
+Last updated: 9 November 2026
+Repository: https://github.com/Yash-658/Python-Backend
+Working branch: main
+
+PURPOSE
+Build a backend for a coding platform where users can register/login, browse coding problems, submit Python solutions, and receive asynchronously generated judging results. Admins manage problems and related test cases.
+
+1. WHAT WE HAVE ACHIEVED
+
+Backend foundation
+- FastAPI application with separate routers, models, schemas, services, utilities, and workers.
+- PostgreSQL database connected through SQLAlchemy.
+- Alembic migrations for database schema changes.
+- Pydantic request/response validation.
+
+Authentication and authorization
+- User registration and login.
+- Password hashing and verification using pwdlib.
+- JWT access tokens with a 30-minute default expiry.
+- Authentication dependency that resolves the current user.
+- Role-based authorization dependency for admin-only endpoints.
+- Problem creation, updating, deletion, and test-case addition are protected for admins.
+
+Problems and submissions
+- Problem and test-case database models and API endpoints.
+- Submission records linked to users and problems.
+- Users can submit code and view their own submissions.
+- Submission ownership is checked when retrieving an individual submission.
+- Submission responses include verdict/status, passed/total test-case counts, execution time, memory usage, and error information.
+
+Python judging engine
+- Submitted Python code is executed inside Docker containers.
+- Container restrictions include no network, memory and CPU limits, read-only filesystem, dropped Linux capabilities, no-new-privileges, and a process limit.
+- Execution timeout handling and container cleanup are implemented.
+- Judge compares normalized output (leading/trailing whitespace is stripped).
+- Verdicts include accepted, wrong answer, runtime error, time limit exceeded, and no test cases.
+- Execution time is the total elapsed time across test-case Docker runs, including container startup/shutdown. Memory measurement is based on the submitted Python child process.
+
+Asynchronous judging and recovery
+- Redis and RQ separate submission API requests from code judging.
+- Submission endpoint saves a pending record, enqueues a judging job, and returns HTTP 202.
+- Worker updates the submission status and stores the judging result.
+- Automatic retries are configured for temporary job failures (Retry(max=2)).
+- A failure callback marks a submission as judge_error after retries are exhausted.
+- A CLI utility lists failed jobs and manually requeues a failed judging job.
+- Worker uses a Windows-compatible SimpleWorker with a 60-second maintenance interval for local development.
+- The central app.models registry ensures all ORM models are registered in each process.
+- A temporary Redis-only recovery probe was used and then deleted. Its final job result showed FINISHED, 2 attempts, 0 retries left, and completion on attempt 2. The first cleanup observation was FINISHED rather than the expected QUEUED state, so the intermediate abandoned-job transition was not conclusively captured in the shared output. Rerun a controlled probe if strict confirmation is needed.
+
+2. CURRENT PROJECT STRUCTURE
+
+main.py
+app/
+  database.py
+  dependencies.py
+  queue.py
+  models/       UserDB, ProblemDB, TestCaseDB, SubmissionDB, model registry
+  schemas/      users, problems, test cases, submissions
+  routers/      users, problems, submissions
+  services/     code_executor, execution_result, judge_service
+  utils/        auth, security
+  workers/      judge_worker, failed_jobs
+alembic/        migration environment and migration history
+zhelp.txt       project learning/architecture notes and original TODO note
+
+3. REMAINING IMPLEMENTATION TASKS
+
+Recommended order — continue one task at a time:
+
+A. Backend correctness and access control
+1. Restrict GET /users to admins. Current implementation requires authentication but does not require the admin role, so an ordinary authenticated user can list users.
+2. Validate the requested submission language. The current executor only supports Python; reject unsupported language values rather than accepting them and attempting Python execution.
+3. Confirm the intended case-sensitivity rule for problem titles and implement/test it. ProblemDB.title currently has a unique constraint, while zhelp.txt still records case-sensitive uniqueness checking as a TODO. Confirm whether differently cased titles should be allowed or rejected before changing the constraint.
+4. Decide whether admin user-management endpoints (for example, changing roles or disabling users) are part of the MVP. They are not currently implemented.
+5. Consider adding update/delete endpoints for individual test cases. Adding test cases is implemented; individual update/delete operations are not present in the current router.
+
+B. Automated tests
+6. Add automated tests for registration, login, token validation, RBAC, problem CRUD, test-case operations, submission ownership, and response schemas.
+7. Add judging tests for accepted output, wrong answers, runtime errors, timeouts, whitespace normalization, empty test-case sets, and execution metrics.
+8. Add queue/worker tests for Redis unavailable, enqueue failure, retry exhaustion, failed-job listing/requeue, and abandoned-job recovery. Avoid relying only on manual testing.
+
+C. Reproducibility and documentation
+9. Add a requirements.txt (or another dependency lock/manifest) if one is not already maintained; the repository root currently has no requirements.txt, pyproject.toml, Pipfile, or setup.py.
+10. Add an .env.example documenting required environment variable names without real secrets (at least DATABASE_URL, REDIS_URL, SECRET_KEY).
+11. Improve README with setup instructions, migrations, API usage, and commands for running API, Redis, and worker.
+
+D. Deployment and security hardening
+12. Prepare a deployment setup for API, worker, PostgreSQL, and Redis (for example, Docker Compose).
+13. Use a suitable production worker configuration on Linux; the current WindowsSimpleWorker is for local Windows development.
+14. Review Docker execution security before deployment, including image pinning, resource limits, process isolation, and operational cleanup/monitoring.
+
+Future enhancements, not required for the initial backend MVP: frontend, more programming languages, problem search/filtering, submission pagination, password reset/token refresh, and richer user features.
+
+4. USEFUL LOCAL COMMANDS
+
+Run the FastAPI development server:
+  uvicorn main:app --reload
+
+Run the judging worker (Windows development setup):
+  python -m app.workers.judge_worker
+
+List failed judging jobs:
+  python -m app.workers.failed_jobs list
+
+Manually requeue a failed job:
+  python -m app.workers.failed_jobs requeue <JOB_ID>
+
+Redis container used during local development:
+  docker run -d --name coding-platform-redis -p 127.0.0.1:6379:6379 redis:7-alpine
+
+Check Redis connectivity:
+  docker exec coding-platform-redis redis-cli ping
+
+Run database migrations (when needed):
+  alembic upgrade head
+
+Required environment variables:
+  DATABASE_URL
+  REDIS_URL
+  SECRET_KEY
+
+5. WHERE TO RESUME
+
+Start with Task A1: make GET /users admin-only. Before editing, inspect the latest main branch because the repository may have changed since this note was created. Then implement the smallest change, explain each code change briefly before asking for it to be copied, and test the endpoint with both an ordinary user token and an admin token.
+
+Project collaboration preferences:
+- Always inspect https://github.com/Yash-658/Python-Backend (main) before making decisions that depend on existing project code.
+- Work incrementally; do not introduce unnecessary architecture or scope.
+- Briefly explain every code block before asking the user to copy/paste it.
+- Keep this file as a handoff snapshot; update it when meaningful project milestones are completed.

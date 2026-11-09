@@ -53,3 +53,5 @@ TO DO:
 >> services/	Business logic, such as judging submissions
 >> utils/	   Reusable helper functions
 >> queue.py	   Redis connection and queue configuration
+
+CHECK PYTHON BACKEND PROJECT HANDOFF NOTES BEFORE CONTINUING THIS PROJECT~
